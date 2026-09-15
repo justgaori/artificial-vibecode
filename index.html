@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>InkNet · 손글씨 숫자 인식</title>
+  <meta name="description" content="브라우저에서 바로 동작하는 손글씨 숫자(0–9) 인식기. TensorFlow.js CNN이 캔버스에 쓴 숫자를 실시간으로 판별합니다." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <header class="site-header">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">墨</span>
+      <div>
+        <strong>InkNet</strong>
+        <span>손글씨 숫자 인식</span>
+      </div>
+    </div>
+    <p class="model-status" id="model-status" role="status">모델 불러오는 중…</p>
+  </header>
+
+  <main class="layout">
+    <section class="panel draw-panel" aria-labelledby="draw-title">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">Canvas</p>
+          <h1 id="draw-title">숫자를 써 보세요</h1>
+        </div>
+        <p class="hint">0부터 9까지, 한 글자만 크게 쓰면 정확도가 올라갑니다.</p>
+      </div>
+
+      <div class="canvas-shell">
+        <canvas id="draw-canvas" width="420" height="420" aria-label="손글씨 입력 캔버스"></canvas>
+        <div class="canvas-grid" aria-hidden="true"></div>
+      </div>
+
+      <div class="toolbar">
+        <label class="brush">
+          굵기
+          <input id="brush-size" type="range" min="10" max="36" value="22" />
+        </label>
+        <div class="actions">
+          <button type="button" class="btn ghost" id="undo-btn">되돌리기</button>
+          <button type="button" class="btn ghost" id="clear-btn">지우기</button>
+          <button type="button" class="btn primary" id="predict-btn">인식하기</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel result-panel" aria-labelledby="result-title">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">Prediction</p>
+          <h2 id="result-title">인식 결과</h2>
+        </div>
+      </div>
+
+      <div class="verdict">
+        <div class="digit" id="predicted-digit">—</div>
+        <div>
+          <p class="confidence-label">신뢰도</p>
+          <p class="confidence-value" id="predicted-confidence">아직 쓴 숫자가 없습니다</p>
+        </div>
+      </div>
+
+      <div class="preview-row">
+        <figure>
+          <canvas id="preview-canvas" width="28" height="28" aria-label="모델 입력 미리보기"></canvas>
+          <figcaption>모델이 보는 28×28</figcaption>
+        </figure>
+        <p class="note">
+          MNIST 형식에 맞춰 글자를 잘라 가운데 놓고, 흰 글씨·검은 배경으로 변환한 뒤 CNN에 넣습니다.
+        </p>
+      </div>
+
+      <ol class="bars" id="prob-bars" aria-label="숫자별 확률"></ol>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>브라우저에서 바로 추론합니다. 그림은 서버로 전송되지 않습니다.</p>
+    <p>CNN · TensorFlow.js · MNIST</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

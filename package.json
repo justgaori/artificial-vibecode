@@ -1,0 +1,9 @@
+{
+  "name": "handwriting-recognition",
+  "version": "1.0.0",
+  "private": true,
+  "description": "브라우저에서 동작하는 손글씨 숫자 인식기 (TensorFlow.js + MNIST CNN)",
+  "scripts": {
+    "start": "npx --yes serve -l 5173"
+  }
+}

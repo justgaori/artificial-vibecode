@@ -1,0 +1,423 @@
+:root {
+  --bg: #f3eee4;
+  --paper: #fffaf2;
+  --ink: #2c241c;
+  --muted: #7a6e62;
+  --line: #e6dccb;
+  --accent: #c45c26;
+  --work: #c45c26;
+  --personal: #4d6b52;
+  --study: #2f6f8f;
+  --shadow: 0 18px 40px rgba(70, 48, 28, 0.08);
+  font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, #fff8ee 0%, transparent 36%),
+    radial-gradient(circle at 80% 10%, #f5e6d4 0%, transparent 28%),
+    var(--bg);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.app {
+  width: min(920px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 40px 0 64px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fffaf2;
+  font-family: 'Noto Serif KR', serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.brand h1 {
+  margin: 0;
+  font-family: 'Noto Serif KR', serif;
+  font-size: 28px;
+  letter-spacing: -0.03em;
+}
+
+.brand p,
+.today,
+#summary,
+#done-summary {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.composer,
+.board,
+.todo-item {
+  background: var(--paper);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+
+.composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px 120px auto;
+  gap: 10px;
+  padding: 16px;
+  margin-bottom: 22px;
+}
+
+.composer input,
+.composer select,
+.composer button,
+.filter {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.composer input,
+.composer select {
+  min-height: 48px;
+  padding: 0 14px;
+}
+
+.composer button {
+  padding: 0 20px;
+  border: 0;
+  background: var(--accent);
+  color: #fffaf2;
+  font-weight: 600;
+}
+
+.board {
+  padding: 22px 22px 10px;
+}
+
+.board + .board {
+  margin-top: 22px;
+}
+
+.board-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.board-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-btn {
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--muted);
+}
+
+.view-btn.is-active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fffaf2;
+}
+
+.board-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filter {
+  padding: 8px 14px;
+  color: var(--muted);
+}
+
+.filter.is-active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fffaf2;
+}
+
+.todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.todo-item {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 16px 18px;
+  box-shadow: none;
+  border: 1px solid var(--line);
+}
+
+.todo-item.is-done .todo-title {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.todo-item input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.todo-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.todo-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #fffaf2;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-work {
+  background: var(--work);
+}
+
+.badge-personal {
+  background: var(--personal);
+}
+
+.badge-study {
+  background: var(--study);
+}
+
+.todo-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cancel-btn,
+.delete-btn {
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+}
+
+.cancel-btn {
+  color: var(--muted);
+}
+
+.delete-btn {
+  color: #b04a3a;
+}
+
+.date-text {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.empty {
+  padding: 36px 12px 28px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.calendar {
+  padding-bottom: 12px;
+}
+
+.calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.calendar-head button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+}
+
+.calendar-head button:hover {
+  background: #fff;
+}
+
+.calendar-weekdays,
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.calendar-weekdays span {
+  padding-bottom: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.calendar-cell {
+  overflow: hidden;
+  min-height: 86px;
+  padding: 6px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.calendar-cell.outside {
+  opacity: 0.35;
+}
+
+.calendar-cell.today .calendar-num {
+  background: var(--accent);
+  color: #fffaf2;
+}
+
+.calendar-cell.is-selected {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.calendar-num {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.calendar-event {
+  overflow: hidden;
+  margin-top: 3px;
+  padding: 2px 5px;
+  border-radius: 6px;
+  color: #fffaf2;
+  font-size: 10px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.calendar-event.work {
+  background: var(--work);
+}
+
+.calendar-event.personal {
+  background: var(--personal);
+}
+
+.calendar-event.study {
+  background: var(--study);
+}
+
+.calendar-more {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.calendar-day-panel {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.calendar-day-panel h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+@media (max-width: 720px) {
+  .header,
+  .board-head,
+  .board-tools {
+    display: grid;
+  }
+
+  .composer {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-cell {
+    min-height: 64px;
+    padding: 4px;
+  }
+}

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>하루 수첩</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="header">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">하루</span>
+          <div>
+            <h1>하루 수첩</h1>
+            <p>매일 할 일을 적고, 분류해서 관리하세요</p>
+          </div>
+        </div>
+        <p class="today" id="today-label"></p>
+      </header>
+
+      <form class="composer" id="todo-form">
+        <label class="sr-only" for="todo-title">할 일</label>
+        <input
+          id="todo-title"
+          name="title"
+          type="text"
+          placeholder="오늘 해야 할 일을 적어 보세요"
+          required
+          maxlength="80"
+        />
+
+        <label class="sr-only" for="todo-date">날짜</label>
+        <input id="todo-date" name="date" type="date" required />
+
+        <label class="sr-only" for="todo-category">분류</label>
+        <select id="todo-category" name="category">
+          <option value="work">업무</option>
+          <option value="personal">개인</option>
+          <option value="study">공부</option>
+        </select>
+
+        <button type="submit">추가하기</button>
+      </form>
+
+      <section class="board" aria-labelledby="list-title">
+        <div class="board-head">
+          <h2 id="list-title">할 일 목록</h2>
+          <div class="board-tools">
+            <p id="summary"></p>
+            <button type="button" class="view-btn is-active" data-view="list">목록</button>
+            <button type="button" class="view-btn" data-view="calendar">달력</button>
+          </div>
+        </div>
+
+        <div class="filters" role="tablist" aria-label="분류">
+          <button type="button" class="filter is-active" data-filter="all">전체</button>
+          <button type="button" class="filter" data-filter="work">업무</button>
+          <button type="button" class="filter" data-filter="personal">개인</button>
+          <button type="button" class="filter" data-filter="study">공부</button>
+        </div>
+
+        <ul class="todo-list" id="todo-list"></ul>
+
+        <div class="calendar" id="calendar-view" hidden>
+          <div class="calendar-head">
+            <button type="button" id="cal-prev" aria-label="이전 달">‹</button>
+            <strong id="cal-label"></strong>
+            <button type="button" id="cal-next" aria-label="다음 달">›</button>
+          </div>
+          <div class="calendar-weekdays">
+            <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+          </div>
+          <div class="calendar-grid" id="calendar-grid"></div>
+          <div class="calendar-day-panel">
+            <h3 id="calendar-day-title"></h3>
+            <ul class="todo-list" id="calendar-day-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="board" id="done-board" aria-labelledby="done-title">
+        <div class="board-head">
+          <h2 id="done-title">완료 목록</h2>
+          <p id="done-summary"></p>
+        </div>
+        <ul class="todo-list" id="done-list"></ul>
+      </section>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

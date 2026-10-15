@@ -1,0 +1,31 @@
+body.is-desktop .app {
+  width: min(1180px, calc(100% - 48px));
+}
+
+body.is-desktop .workspace {
+  grid-template-columns: 300px minmax(0, 1fr);
+  align-items: start;
+}
+
+body.is-desktop .dashboard {
+  position: sticky;
+  top: 18px;
+}
+
+body.is-desktop .composer {
+  grid-template-columns: minmax(0, 1fr) 160px 130px auto;
+}
+
+body.is-desktop .calendar-cell {
+  min-height: 108px;
+}
+
+@media (max-width: 860px) {
+  body.is-desktop .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  body.is-desktop .dashboard {
+    position: static;
+  }
+}

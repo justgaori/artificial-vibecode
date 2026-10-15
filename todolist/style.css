@@ -420,4 +420,250 @@ button {
     min-height: 64px;
     padding: 4px;
   }
+
+  .extra-tools {
+    gap: 6px;
+  }
+}
+
+.header-side {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quote {
+  margin: -8px 0 18px;
+  color: var(--muted);
+  font-family: 'Noto Serif KR', serif;
+  font-size: 15px;
+}
+
+.suggest-hint {
+  margin: -12px 4px 16px;
+  color: var(--study);
+  font-size: 13px;
+}
+
+.workspace {
+  display: grid;
+  gap: 22px;
+}
+
+.dashboard {
+  padding-bottom: 18px;
+}
+
+.progress-block,
+.mini-progress {
+  margin-bottom: 12px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.progress-track {
+  overflow: hidden;
+  height: 8px;
+  border-radius: 999px;
+  background: #efe6d8;
+}
+
+.progress-track span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.progress-track .bar-work {
+  background: var(--work);
+}
+
+.progress-track .bar-personal {
+  background: var(--personal);
+}
+
+.progress-track .bar-study {
+  background: var(--study);
+}
+
+.shortcut-hint {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.extra-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -4px 0 14px;
+}
+
+.text-btn,
+.ghost-btn,
+.solid-btn {
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.text-btn,
+.ghost-btn {
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.text-btn.danger {
+  color: #b04a3a;
+}
+
+.solid-btn {
+  padding: 9px 14px;
+  border: 0;
+  background: var(--accent);
+  color: #fffaf2;
+}
+
+.sort-select,
+.edit-input,
+.sheet textarea {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: inherit;
+}
+
+.sort-select {
+  min-height: 34px;
+  padding: 0 8px;
+}
+
+.edit-input {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 8px;
+  font: inherit;
+  font-weight: 600;
+}
+
+.sheet {
+  width: min(440px, calc(100% - 32px));
+  padding: 22px;
+  border: 0;
+  border-radius: 20px;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.sheet::backdrop {
+  background: rgba(44, 36, 28, 0.35);
+}
+
+.sheet h3 {
+  margin: 0 0 8px;
+  font-family: 'Noto Serif KR', serif;
+}
+
+.sheet p,
+.sheet-copy {
+  margin: 0 0 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.sheet-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.field-label {
+  display: block;
+  margin: 8px 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sheet textarea {
+  width: 100%;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 13px;
+  box-shadow: var(--shadow);
+}
+
+html.dark {
+  --bg: #1b1714;
+  --paper: #2a241f;
+  --ink: #f6efe6;
+  --muted: #b7aa9d;
+  --line: #43382f;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+html.dark body {
+  background:
+    radial-gradient(circle at top left, #2c241c 0%, transparent 36%),
+    radial-gradient(circle at 80% 10%, #3a2b22 0%, transparent 28%),
+    var(--bg);
+}
+
+html.dark .composer input,
+html.dark .composer select,
+html.dark .filter,
+html.dark .view-btn,
+html.dark .text-btn,
+html.dark .ghost-btn,
+html.dark .sort-select,
+html.dark .edit-input,
+html.dark .sheet textarea {
+  background: #241e1a;
+  color: var(--ink);
+}
+
+html.dark .view-btn.is-active,
+html.dark .filter.is-active {
+  background: #f3e6d4;
+  color: #2c241c;
+  border-color: #f3e6d4;
+}
+
+html.dark .progress-track {
+  background: #3a312a;
+}
+
+html.dark .calendar-cell.is-selected,
+html.dark .calendar-head button:hover {
+  background: #342c26;
 }

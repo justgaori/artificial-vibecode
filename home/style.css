@@ -1,0 +1,114 @@
+:root {
+  color: #202124;
+  background: #fff;
+  font-family: 'IBM Plex Sans KR', 'Malgun Gothic', sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.page {
+  width: min(980px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 64px 0 80px;
+}
+
+.clock {
+  margin: 0;
+  text-align: center;
+  color: #5f6368;
+  font-variant-numeric: tabular-nums;
+}
+
+h1 {
+  margin: 8px 0 22px;
+  text-align: center;
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+.search {
+  display: flex;
+  gap: 8px;
+  width: min(640px, 100%);
+  margin: 0 auto 36px;
+  padding: 8px;
+  border: 1px solid #dfe1e5;
+  border-radius: 999px;
+  box-shadow: 0 1px 6px rgba(32, 33, 36, 0.12);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 10px 16px;
+  outline: none;
+}
+
+.search button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0 18px;
+  background: #1a73e8;
+  color: white;
+  font-weight: 600;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.note {
+  min-height: 240px;
+  padding: 18px 18px 14px;
+  border-radius: 8px 18px 14px 16px;
+  box-shadow: 0 10px 24px rgba(32, 33, 36, 0.06);
+}
+
+.note h2 { margin: 0 0 10px; font-size: 16px; }
+.big { margin: 0; font-size: 42px; font-weight: 650; letter-spacing: -0.04em; }
+.yellow { background: #fff4c2; }
+.blue { background: #d9ecff; }
+.green { background: #d9f5df; }
+.pink { background: #ffe0ea; }
+
+.todo-form input, .note li { font-size: 14px; }
+.todo-form input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+#todo-list, #news-list { margin: 0; padding: 0; list-style: none; }
+#todo-list li, #news-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 6px 0;
+}
+#news-list a { color: #174ea6; }
+.done span { text-decoration: line-through; color: #5f6368; }
+.icon-btn { border: 0; background: transparent; color: #5f6368; }
+.source { margin: 12px 0 0; color: #5f6368; font-size: 12px; }
+
+@media (max-width: 720px) {
+  h1 { font-size: 32px; }
+  .grid { grid-template-columns: 1fr; }
+}

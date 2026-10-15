@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>오늘을 여는 페이지</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <p class="clock" id="clock">--:--:--</p>
+      <h1>오늘을 여는 페이지</h1>
+      <form class="search" id="search-form" action="https://www.google.com/search" method="get">
+        <label class="sr-only" for="query">검색</label>
+        <input id="query" name="q" type="search" placeholder="검색어를 입력하세요" required />
+        <button type="submit">검색</button>
+      </form>
+
+      <section class="grid">
+        <article class="note yellow">
+          <h2>현재 시간</h2>
+          <p class="big" id="clock-card">--:--</p>
+          <p id="date-card"></p>
+        </article>
+
+        <article class="note blue">
+          <h2>오늘의 할 일</h2>
+          <form id="todo-form" class="todo-form">
+            <input id="todo-input" type="text" maxlength="60" placeholder="할 일을 적고 Enter" required />
+          </form>
+          <ul id="todo-list"></ul>
+        </article>
+
+        <article class="note green">
+          <h2>오늘의 날씨</h2>
+          <p class="big" id="weather-temp">불러오는 중</p>
+          <p id="weather-text">서울 · Open-Meteo</p>
+        </article>
+
+        <article class="note pink">
+          <h2>최신 기술 뉴스</h2>
+          <ul id="news-list">
+            <li>소식을 불러오는 중입니다.</li>
+          </ul>
+          <p class="source">제목은 Hacker News에서 가져옵니다. 직접 만들지 않습니다.</p>
+        </article>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

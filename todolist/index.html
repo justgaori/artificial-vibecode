@@ -23,8 +23,13 @@
             <p>매일 할 일을 적고, 분류해서 관리하세요</p>
           </div>
         </div>
-        <p class="today" id="today-label"></p>
+        <div class="header-side">
+          <p class="today" id="today-label"></p>
+          <button type="button" class="ghost-btn" id="theme-toggle" aria-pressed="false">다크모드</button>
+        </div>
       </header>
+
+      <p class="quote" id="daily-quote"></p>
 
       <form class="composer" id="todo-form">
         <label class="sr-only" for="todo-title">할 일</label>
@@ -35,6 +40,7 @@
           placeholder="오늘 해야 할 일을 적어 보세요"
           required
           maxlength="80"
+          autocomplete="off"
         />
 
         <label class="sr-only" for="todo-date">날짜</label>
@@ -49,51 +55,120 @@
 
         <button type="submit">추가하기</button>
       </form>
+      <p class="suggest-hint" id="suggest-hint" hidden></p>
 
-      <section class="board" aria-labelledby="list-title">
-        <div class="board-head">
-          <h2 id="list-title">할 일 목록</h2>
-          <div class="board-tools">
-            <p id="summary"></p>
-            <button type="button" class="view-btn is-active" data-view="list">목록</button>
-            <button type="button" class="view-btn" data-view="calendar">달력</button>
+      <div class="workspace">
+        <aside class="dashboard board" aria-label="진행률">
+          <div class="board-head">
+            <h2>진행률</h2>
           </div>
-        </div>
-
-        <div class="filters" role="tablist" aria-label="분류">
-          <button type="button" class="filter is-active" data-filter="all">전체</button>
-          <button type="button" class="filter" data-filter="work">업무</button>
-          <button type="button" class="filter" data-filter="personal">개인</button>
-          <button type="button" class="filter" data-filter="study">공부</button>
-        </div>
-
-        <ul class="todo-list" id="todo-list"></ul>
-
-        <div class="calendar" id="calendar-view" hidden>
-          <div class="calendar-head">
-            <button type="button" id="cal-prev" aria-label="이전 달">‹</button>
-            <strong id="cal-label"></strong>
-            <button type="button" id="cal-next" aria-label="다음 달">›</button>
+          <div class="progress-block">
+            <div class="progress-label">
+              <span>전체</span>
+              <strong id="progress-overall-text">0%</strong>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+              <span id="progress-overall-bar"></span>
+            </div>
           </div>
-          <div class="calendar-weekdays">
-            <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
-          </div>
-          <div class="calendar-grid" id="calendar-grid"></div>
-          <div class="calendar-day-panel">
-            <h3 id="calendar-day-title"></h3>
-            <ul class="todo-list" id="calendar-day-list"></ul>
-          </div>
-        </div>
-      </section>
+          <div id="progress-categories"></div>
+          <p class="shortcut-hint">단축키 · D 다크모드 · / 입력 · 제목 더블클릭 수정</p>
+        </aside>
 
-      <section class="board" id="done-board" aria-labelledby="done-title">
-        <div class="board-head">
-          <h2 id="done-title">완료 목록</h2>
-          <p id="done-summary"></p>
+        <div class="main-column">
+          <section class="board" aria-labelledby="list-title">
+            <div class="board-head">
+              <h2 id="list-title">할 일 목록</h2>
+              <div class="board-tools">
+                <p id="summary"></p>
+                <label class="sr-only" for="sort-select">정렬</label>
+                <select id="sort-select" class="sort-select">
+                  <option value="latest">최신순</option>
+                  <option value="oldest">오래된순</option>
+                  <option value="date">날짜순</option>
+                  <option value="category">분류순</option>
+                  <option value="title">이름순</option>
+                </select>
+                <button type="button" class="view-btn is-active" data-view="list">목록</button>
+                <button type="button" class="view-btn" data-view="calendar">달력</button>
+              </div>
+            </div>
+
+            <div class="filters" role="tablist" aria-label="분류">
+              <button type="button" class="filter is-active" data-filter="all">전체</button>
+              <button type="button" class="filter" data-filter="work">업무</button>
+              <button type="button" class="filter" data-filter="personal">개인</button>
+              <button type="button" class="filter" data-filter="study">공부</button>
+            </div>
+
+            <div class="extra-tools">
+              <button type="button" class="text-btn" id="reclassify-btn">자동재분류</button>
+              <button type="button" class="text-btn" id="settings-btn">분류설정</button>
+              <button type="button" class="text-btn" id="export-btn">내보내기</button>
+              <button type="button" class="text-btn" id="import-btn">가져오기</button>
+              <button type="button" class="text-btn danger" id="clear-done-btn">완료된 항목 삭제</button>
+              <input id="import-file" type="file" accept="application/json,.json" hidden />
+            </div>
+
+            <ul class="todo-list" id="todo-list"></ul>
+
+            <div class="calendar" id="calendar-view" hidden>
+              <div class="calendar-head">
+                <button type="button" id="cal-prev" aria-label="이전 달">‹</button>
+                <strong id="cal-label"></strong>
+                <button type="button" id="cal-next" aria-label="다음 달">›</button>
+              </div>
+              <div class="calendar-weekdays">
+                <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+              </div>
+              <div class="calendar-grid" id="calendar-grid"></div>
+              <div class="calendar-day-panel">
+                <h3 id="calendar-day-title"></h3>
+                <ul class="todo-list" id="calendar-day-list"></ul>
+              </div>
+            </div>
+          </section>
+
+          <section class="board" id="done-board" aria-labelledby="done-title">
+            <div class="board-head">
+              <h2 id="done-title">완료 목록</h2>
+              <p id="done-summary"></p>
+            </div>
+            <ul class="todo-list" id="done-list"></ul>
+          </section>
         </div>
-        <ul class="todo-list" id="done-list"></ul>
-      </section>
+      </div>
     </div>
+
+    <dialog class="sheet" id="suggest-dialog">
+      <h3>분류 추천</h3>
+      <p id="suggest-text"></p>
+      <div class="sheet-actions">
+        <button type="button" class="ghost-btn" id="suggest-keep">그대로 두기</button>
+        <button type="button" class="solid-btn" id="suggest-accept">확인</button>
+      </div>
+    </dialog>
+
+    <dialog class="sheet" id="settings-dialog">
+      <h3>분류 설정</h3>
+      <p class="sheet-copy">할 일 문장에 아래 단어가 있으면 그 분류를 추천합니다. 쉼표로 구분하세요.</p>
+      <label class="check-row">
+        <input id="classify-enabled" type="checkbox" />
+        추가할 때 자동 분류 추천 사용
+      </label>
+      <label class="field-label" for="keywords-work">업무</label>
+      <textarea id="keywords-work" rows="2"></textarea>
+      <label class="field-label" for="keywords-personal">개인</label>
+      <textarea id="keywords-personal" rows="2"></textarea>
+      <label class="field-label" for="keywords-study">공부</label>
+      <textarea id="keywords-study" rows="2"></textarea>
+      <div class="sheet-actions">
+        <button type="button" class="ghost-btn" id="settings-cancel">닫기</button>
+        <button type="button" class="solid-btn" id="settings-save">저장</button>
+      </div>
+    </dialog>
+
+    <p class="toast" id="toast" hidden></p>
 
     <script src="app.js"></script>
   </body>

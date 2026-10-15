@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>기준 있는 상식</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,560;6..72,650&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="top">
+        <p class="mark">네 분야의 4지선다</p>
+        <h1>기준 있는 상식</h1>
+        <p class="lede">한국사, 과학, 지리, 예술과 문화. 순위가 갈리는 문제는 기준을 문제 안에 적습니다.</p>
+      </header>
+
+      <section id="setup" class="panel">
+        <h2>모드</h2>
+        <div class="modes" role="radiogroup" aria-label="게임 모드">
+          <button type="button" class="mode is-on" data-mode="standard">일반<div>문항당 제한 없음 · 10점</div></button>
+          <button type="button" class="mode" data-mode="speed">스피드<div>한 문제 15초 · 힌트는 4점 감점</div></button>
+          <button type="button" class="mode" data-mode="category">분야별<div>고른 분야만 모두 풀기</div></button>
+        </div>
+        <div id="category-picker" class="cats" hidden>
+          <button type="button" class="cat is-on" data-category="history">한국사</button>
+          <button type="button" class="cat" data-category="science">과학</button>
+          <button type="button" class="cat" data-category="geo">지리</button>
+          <button type="button" class="cat" data-category="art">예술과 문화</button>
+        </div>
+        <button type="button" class="go" id="start-btn">게임 시작</button>
+        <h2 class="rank-title">순위</h2>
+        <ol class="ranks" id="rank-list"></ol>
+      </section>
+
+      <section id="play" class="panel" hidden>
+        <div class="play-meta">
+          <span id="progress-label"></span>
+          <span id="score-label"></span>
+          <span id="timer-label" hidden>15초</span>
+        </div>
+        <p class="eyebrow" id="question-meta"></p>
+        <h2 id="question-text"></h2>
+        <p class="criteria" id="criteria" hidden></p>
+        <div class="choices" id="choices"></div>
+        <div class="play-actions">
+          <button type="button" class="ghost" id="hint-btn">힌트 사용 · 4점 감점</button>
+          <button type="button" class="go" id="next-btn" hidden>다음</button>
+        </div>
+        <p class="feedback" id="feedback" hidden></p>
+      </section>
+
+      <section id="result" class="panel" hidden>
+        <p class="eyebrow">결과</p>
+        <h2 id="result-title"></h2>
+        <p id="result-copy"></p>
+        <form id="rank-form" class="rank-form">
+          <label for="player-name">순위에 남길 이름</label>
+          <input id="player-name" maxlength="12" placeholder="이름" required />
+          <button type="submit" class="go">순위 저장</button>
+        </form>
+        <button type="button" class="ghost" id="again-btn">다시 하기</button>
+      </section>
+    </main>
+    <script src="questions.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

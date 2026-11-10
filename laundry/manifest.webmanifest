@@ -1,0 +1,10 @@
+{
+  "name": "지금 빈 세탁기",
+  "short_name": "빈 세탁기",
+  "description": "생활관 공용 세탁실 빈 기기 확인과 종료 알림",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F4F1EB",
+  "theme_color": "#0C5C55",
+  "lang": "ko"
+}

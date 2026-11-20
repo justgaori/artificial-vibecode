@@ -1,6 +1,34 @@
-﻿.DS_Store
+﻿# OS
+.DS_Store
 Thumbs.db
+
+# Dependencies
 node_modules/
+
+# Editor / IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# Logs
 *.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Lecture PDFs (not to be redistributed)
+pdf/
+
+# Claude Code (migrated to Cursor)
+.claude/
+
+# Playwright MCP
+.playwright-mcp/
+
+# Backup files
+*.backup
+quiz/backup/

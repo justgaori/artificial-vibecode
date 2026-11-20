@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>퀴즈 관리 대시보드</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1c1915;
+        --muted: #6d645b;
+        --paper: #f6f1e7;
+        --card: #fffaf3;
+        --line: #e4d8c8;
+        --accent: #b4482d;
+        font-family: 'IBM Plex Sans KR', 'Malgun Gothic', sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 32px; }
+      .container { max-width: 1200px; margin: 0 auto; }
+      h1 { color: var(--accent); margin: 0 0 8px; }
+      .subtitle { color: var(--muted); margin: 0 0 24px; }
+
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+      .stat-card {
+        padding: 20px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--card);
+      }
+      .stat-card h3 { margin: 0 0 12px; font-size: 14px; color: var(--muted); }
+      .stat-card .value { font-size: 32px; font-weight: 700; color: var(--accent); }
+      .stat-list { margin: 0; padding: 0; list-style: none; line-height: 1.8; }
+
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .filter-btn {
+        padding: 8px 16px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+        cursor: pointer;
+        font: inherit;
+      }
+      .filter-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--card);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      th, td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+      }
+      th { background: var(--ink); color: #fff; font-weight: 600; }
+      tr:last-child td { border-bottom: none; }
+      tr:hover td { background: #faf5ed; }
+      .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .badge-history { background: #fce4d6; color: #9c4221; }
+      .badge-science { background: #d4edda; color: #155724; }
+      .badge-geo { background: #cce5ff; color: #004085; }
+      .badge-art { background: #f5d0fe; color: #6b21a8; }
+      .badge-초급 { background: #e2e8f0; color: #475569; }
+      .badge-중급 { background: #fef3c7; color: #92400e; }
+      .warning { color: var(--accent); font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>퀴즈 관리 대시보드</h1>
+      <p class="subtitle">문항 현황과 통계를 한눈에 확인하세요.</p>
+
+      <div class="stats-row" id="stats-row"></div>
+
+      <div class="filters" id="filters"></div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>분야</th>
+            <th>난이도</th>
+            <th>문제</th>
+            <th>정답</th>
+            <th>기준</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <script src="questions.js"></script>
+    <script>
+      const CATEGORY_LABEL = {
+        history: '한국사',
+        science: '과학',
+        geo: '지리',
+        art: '예술과 문화',
+      }
+
+      let currentCategory = 'all'
+      let currentDifficulty = 'all'
+
+      function render() {
+        const bank = window.QUIZ_BANK
+        renderStats(bank)
+        renderFilters()
+        renderTable(bank)
+      }
+
+      function renderStats(bank) {
+        const categoryCount = {}
+        const difficultyCount = { '초급': 0, '중급': 0 }
+        const answerDist = [0, 0, 0, 0]
+        let missingCriteria = 0
+
+        bank.forEach((q) => {
+          categoryCount[q.category] = (categoryCount[q.category] || 0) + 1
+          difficultyCount[q.difficulty] = (difficultyCount[q.difficulty] || 0) + 1
+          answerDist[q.answer] += 1
+          if (hasSuperlative(q.question) && !q.criteria) missingCriteria++
+        })
+
+        document.getElementById('stats-row').innerHTML = `
+          <div class="stat-card">
+            <h3>총 문항</h3>
+            <div class="value">${bank.length}</div>
+          </div>
+          <div class="stat-card">
+            <h3>분야별</h3>
+            <ul class="stat-list">
+              ${Object.keys(CATEGORY_LABEL).map(k => `<li>${CATEGORY_LABEL[k]}: ${categoryCount[k] || 0}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="stat-card">
+            <h3>난이도별</h3>
+            <ul class="stat-list">
+              <li>초급: ${difficultyCount['초급']}</li>
+              <li>중급: ${difficultyCount['중급']}</li>
+            </ul>
+          </div>
+          <div class="stat-card">
+            <h3>정답 분포</h3>
+            <ul class="stat-list">
+              ${answerDist.map((c, i) => `<li>보기 ${i+1}: ${c} (${Math.round(c/bank.length*100)}%)</li>`).join('')}
+            </ul>
+          </div>
+          <div class="stat-card">
+            <h3>검증 필요</h3>
+            <div class="value ${missingCriteria > 0 ? 'warning' : ''}">${missingCriteria}</div>
+            <p style="margin:4px 0 0;font-size:13px;color:var(--muted)">최상급 표현 + 기준 없음</p>
+          </div>
+        `
+      }
+
+      function renderFilters() {
+        const categories = ['all', ...Object.keys(CATEGORY_LABEL)]
+        const difficulties = ['all', '초급', '중급']
+
+        document.getElementById('filters').innerHTML = `
+          ${categories.map(c => `<button class="filter-btn ${currentCategory === c ? 'active' : ''}" data-category="${c}">${c === 'all' ? '전체 분야' : CATEGORY_LABEL[c]}</button>`).join('')}
+          <span style="width:20px"></span>
+          ${difficulties.map(d => `<button class="filter-btn ${currentDifficulty === d ? 'active' : ''}" data-difficulty="${d}">${d === 'all' ? '전체 난이도' : d}</button>`).join('')}
+        `
+
+        document.querySelectorAll('[data-category]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            currentCategory = btn.dataset.category
+            render()
+          })
+        })
+
+        document.querySelectorAll('[data-difficulty]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            currentDifficulty = btn.dataset.difficulty
+            render()
+          })
+        })
+      }
+
+      function renderTable(bank) {
+        const filtered = bank.filter(q => {
+          if (currentCategory !== 'all' && q.category !== currentCategory) return false
+          if (currentDifficulty !== 'all' && q.difficulty !== currentDifficulty) return false
+          return true
+        })
+
+        document.getElementById('table-body').innerHTML = filtered.map(q => `
+          <tr>
+            <td>${q.id}</td>
+            <td><span class="badge badge-${q.category}">${CATEGORY_LABEL[q.category]}</span></td>
+            <td><span class="badge badge-${q.difficulty}">${q.difficulty}</span></td>
+            <td>${q.question}${hasSuperlative(q.question) && !q.criteria ? ' <span class="warning">⚠️</span>' : ''}</td>
+            <td>${q.choices[q.answer]}</td>
+            <td>${q.criteria || '-'}</td>
+          </tr>
+        `).join('')
+      }
+
+      function hasSuperlative(text) {
+        return /가장|최초|최대|최고|최장/.test(text)
+      }
+
+      render()
+    </script>
+  </body>
+</html>

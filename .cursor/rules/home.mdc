@@ -1,0 +1,40 @@
+---
+description: 시작 페이지 앱 개발 규칙
+globs:
+  - "home/**"
+---
+
+# 오늘을 여는 페이지
+
+시계, 검색, 날씨, 뉴스, 할 일을 한눈에 보여주는 시작 페이지입니다.
+
+## 주요 기능
+
+1. **현재 시간**: 실시간 시계 (초 단위 갱신)
+2. **검색**: Google 검색 연동
+3. **서울 날씨**: Open-Meteo API 사용
+4. **기술 뉴스**: Hacker News API 사용
+5. **오늘의 할 일**: localStorage 저장
+
+## 외부 API
+
+### Open-Meteo (날씨)
+
+- URL: `https://api.open-meteo.com/v1/forecast`
+- 좌표: 서울 (37.5665, 126.9780)
+- 무료, API 키 불필요
+
+### Hacker News (뉴스)
+
+- URL: `https://hn.algolia.com/api/v1/search`
+- front_page 태그로 상위 4개 가져옴
+- 무료, API 키 불필요
+
+## 오류 처리
+
+- 날씨 실패: "Open-Meteo에서 날씨를 가져오지 못했습니다" 표시
+- 뉴스 실패: Hacker News 직접 링크 제공
+
+## 외부 의존성
+
+- Google Fonts: IBM Plex Sans KR

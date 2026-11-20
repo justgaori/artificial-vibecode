@@ -95,7 +95,7 @@ async function loadWeather() {
     weatherText.textContent = `서울 · ${weatherLabel(data.current.weather_code)}`
   } catch (error) {
     weatherTemp.textContent = '연결 실패'
-    weatherText.textContent = '기상청에서 서울 날씨를 확인해 주세요.'
+    weatherText.textContent = 'Open-Meteo에서 날씨를 가져오지 못했습니다.'
   }
 }
 

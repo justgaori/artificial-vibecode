@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리더보드 - PromptBench</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏆 리더보드</h1>
+            <p class="subtitle">AI 협업 효율 순위</p>
+        </header>
+
+        <main>
+            <section style="margin-bottom:2rem;text-align:center;">
+                <p style="color:var(--text-muted);">
+                    100% 통과한 사용자 중, 사용 토큰이 적은 순으로 정렬됩니다.
+                </p>
+            </section>
+
+            <div id="leaderboard-container">
+                <div class="loading">리더보드를 불러오는 중...</div>
+            </div>
+
+            <div class="links" style="margin-top:2rem;">
+                <a href="/" class="btn btn-secondary">🏠 홈으로</a>
+            </div>
+        </main>
+
+        <footer>
+            <p>PromptBench © 2024 - AI 협업 코딩 측정 플랫폼</p>
+        </footer>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadLeaderboard();
+        });
+
+        async function loadLeaderboard() {
+            const container = document.getElementById('leaderboard-container');
+            
+            try {
+                const response = await fetch('/api/leaderboard');
+                const entries = await response.json();
+                
+                if (entries.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align:center;padding:3rem;background:var(--bg-card);border-radius:var(--radius);border:1px solid var(--border);">
+                            <p style="font-size:3rem;margin-bottom:1rem;">🏆</p>
+                            <p style="color:var(--text-muted);">아직 100% 통과한 기록이 없습니다.</p>
+                            <p style="color:var(--text-muted);font-size:0.9rem;">문제를 풀고 첫 번째 1등이 되어보세요!</p>
+                            <a href="/" class="btn btn-primary" style="margin-top:1rem;">문제 풀러 가기</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>순위</th>
+                                <th>사용자</th>
+                                <th>문제</th>
+                                <th>토큰</th>
+                                <th>프롬프트</th>
+                                <th>시간</th>
+                                <th>비용</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${entries.map(entry => `
+                                <tr>
+                                    <td class="rank ${getRankClass(entry.rank)}">${getRankDisplay(entry.rank)}</td>
+                                    <td>
+                                        ${entry.username}
+                                        ${entry.mockSession ? '<span class="mock-badge" style="font-size:0.7rem;padding:0.1rem 0.4rem;">모의</span>' : ''}
+                                    </td>
+                                    <td>${entry.problemTitle}</td>
+                                    <td>${formatTokens(entry.totalTokens)}</td>
+                                    <td>${entry.promptCount}회</td>
+                                    <td>${formatTimeShort(entry.elapsedTimeSeconds)}</td>
+                                    <td>${formatCost(entry.estimatedCost)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+            } catch (error) {
+                container.innerHTML = `<p class="error">리더보드를 불러오는데 실패했습니다: ${error.message}</p>`;
+            }
+        }
+
+        function getRankClass(rank) {
+            if (rank === 1) return 'rank-1';
+            if (rank === 2) return 'rank-2';
+            if (rank === 3) return 'rank-3';
+            return '';
+        }
+
+        function getRankDisplay(rank) {
+            if (rank === 1) return '🥇';
+            if (rank === 2) return '🥈';
+            if (rank === 3) return '🥉';
+            return rank;
+        }
+
+        function formatTimeShort(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html>

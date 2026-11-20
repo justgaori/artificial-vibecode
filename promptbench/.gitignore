@@ -1,0 +1,41 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+*.env.local
+
+# H2 Database
+data/
+*.db
+*.trace.db
+*.lock.db
+
+# Logs
+logs/
+*.log
+
+# Compiled
+*.class
+*.jar
+!gradle/wrapper/*.jar
+
+# Test output
+test-output/
+bin/
+out/

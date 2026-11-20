@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromptBench - AI 협업 코딩 측정 플랫폼</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 PromptBench</h1>
+            <p class="subtitle">AI 협업 코딩 능력 측정 플랫폼</p>
+            <div id="status-badge" class="status-badge"></div>
+        </header>
+
+        <main>
+            <section class="intro">
+                <h2>AI와 함께 코딩 문제를 풀어보세요</h2>
+                <p>
+                    AI 채팅을 활용해 코딩 문제를 해결하고,<br>
+                    <strong>시간, 토큰, 비용, 프롬프트 횟수</strong>를 측정해 효율성을 확인하세요.
+                </p>
+            </section>
+
+            <section class="user-form">
+                <div class="form-group">
+                    <label for="username">사용자 이름</label>
+                    <input type="text" id="username" placeholder="이름을 입력하세요" value="">
+                </div>
+            </section>
+
+            <section class="problem-list">
+                <h3>📋 문제 선택</h3>
+                <div id="problems-container" class="problems-grid">
+                    <div class="loading">문제 목록을 불러오는 중...</div>
+                </div>
+            </section>
+
+            <section class="links">
+                <a href="/leaderboard.html" class="btn btn-secondary">🏆 리더보드 보기</a>
+            </section>
+        </main>
+
+        <footer>
+            <p>PromptBench © 2024 - AI 협업 코딩 측정 플랫폼</p>
+        </footer>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkStatus();
+            await loadProblems();
+        });
+
+        async function loadProblems() {
+            const container = document.getElementById('problems-container');
+            try {
+                const response = await fetch('/api/problems');
+                const problems = await response.json();
+                
+                if (problems.length === 0) {
+                    container.innerHTML = '<p>등록된 문제가 없습니다.</p>';
+                    return;
+                }
+
+                container.innerHTML = problems.map(problem => `
+                    <div class="problem-card" onclick="startProblem(${problem.id})">
+                        <div class="problem-header">
+                            <span class="difficulty ${getDifficultyClass(problem.difficulty)}">${problem.difficulty}</span>
+                            <span class="category">${problem.category}</span>
+                            ${problem.mock ? '<span class="mock-badge">모의 데이터</span>' : ''}
+                        </div>
+                        <h4>${problem.title}</h4>
+                        <p class="problem-preview">${getPreview(problem.description)}</p>
+                        <button class="btn btn-primary">풀이 시작 →</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = `<p class="error">문제를 불러오는데 실패했습니다: ${error.message}</p>`;
+            }
+        }
+
+        function getDifficultyClass(difficulty) {
+            switch(difficulty) {
+                case '쉬움': return 'easy';
+                case '보통': return 'medium';
+                case '어려움': return 'hard';
+                default: return 'easy';
+            }
+        }
+
+        function getPreview(description) {
+            const text = description.replace(/[#*`\n]/g, ' ').trim();
+            return text.length > 80 ? text.substring(0, 80) + '...' : text;
+        }
+
+        async function startProblem(problemId) {
+            const username = document.getElementById('username').value.trim() || '익명';
+            localStorage.setItem('promptbench_username', username);
+            
+            try {
+                const response = await fetch('/api/sessions/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, problemId })
+                });
+                
+                const session = await response.json();
+                localStorage.setItem('promptbench_session', JSON.stringify(session));
+                window.location.href = '/solve.html';
+            } catch (error) {
+                alert('세션 시작 실패: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

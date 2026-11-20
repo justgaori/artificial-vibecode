@@ -1,0 +1,48 @@
+---
+description: 인공지능활용실습 텀프로젝트 전체 규칙
+globs:
+  - "**"
+---
+
+# 인공지능활용실습 텀프로젝트
+
+국립목포대학교 인공지능활용실습 과목 실습 결과물 모음입니다.
+
+## 프로젝트 구조
+
+- `home/`: 시작 페이지 (시계, 검색, 날씨, 뉴스, 할 일)
+- `portfolio/`: 마케팅 포트폴리오 실습용 가상 사례
+- `handwrite/`: 손글씨 숫자 인식 (TensorFlow.js MNIST)
+- `todolist/`: 할 일 관리 앱 (진행률, 다크모드, 자동 분류)
+- `quiz/`: 상식 퀴즈 (일반, 스피드, 분야별 모드)
+- `laundry/`: 휴먼컴퓨터인터랙션 과목 세탁실 프로토타입
+
+## 기술 스택
+
+- 순수 HTML, CSS, JavaScript (빌드 도구 없음)
+- localStorage로 데이터 저장
+- 외부 API: Open-Meteo (날씨), Hacker News (뉴스)
+- TensorFlow.js (손글씨 인식)
+
+## 개발 규칙
+
+1. 정적 파일만 사용한다. 빌드 단계나 서버가 필요 없어야 한다.
+2. 한국어 사용자를 대상으로 한다.
+3. 외부 출처는 반드시 명시한다.
+4. API 키나 비밀 정보는 커밋하지 않는다.
+
+## 외부 출처
+
+- Google Fonts: IBM Plex Sans KR, Noto Sans KR, Newsreader
+- CDN: jsdelivr (Pretendard 폰트)
+- API: Open-Meteo, Hacker News (hn.algolia.com)
+- AI 모델: TensorFlow.js MNIST CNN
+
+## AI 활용 범위
+
+이 프로젝트는 Cursor AI 에디터를 사용하여 개발되었습니다.
+- 코드 생성 및 수정 보조
+- 버그 발견 및 수정
+- 콘텐츠 검증 (퀴즈 문항)
+
+AI가 생성한 코드는 개발자가 직접 검토하고 테스트합니다.

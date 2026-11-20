@@ -12,6 +12,7 @@ const MODE_LABEL = {
 }
 
 const RANK_KEY = 'quiz-rank.v1'
+const PROFILE_KEY = 'quiz-profile.v1'
 const SPEED_MS = 15000
 
 const setupEl = document.getElementById('setup')
@@ -35,6 +36,7 @@ let hinted = false
 let timerId = 0
 let remain = SPEED_MS
 let savedRank = false
+let currentCorrectIndex = 0
 
 document.querySelectorAll('.mode').forEach((button) => {
   button.addEventListener('click', () => {
@@ -57,7 +59,24 @@ nextBtn.addEventListener('click', nextQuestion)
 document.getElementById('again-btn').addEventListener('click', showSetup)
 document.getElementById('rank-form').addEventListener('submit', saveRank)
 
+document.querySelectorAll('.tab').forEach((button) => {
+  button.addEventListener('click', () => {
+    const tab = button.dataset.tab
+    document.querySelectorAll('.tab').forEach((item) => item.classList.toggle('is-on', item === button))
+    document.getElementById('game-tab').hidden = tab !== 'game'
+    document.getElementById('stats-tab').hidden = tab !== 'stats'
+    document.getElementById('profile-tab').hidden = tab !== 'profile'
+    if (tab === 'stats') renderStats()
+    if (tab === 'profile') loadProfile()
+  })
+})
+
+document.getElementById('profile-form').addEventListener('submit', saveProfile)
+document.getElementById('export-csv-btn').addEventListener('click', exportCSV)
+document.getElementById('backup-btn').addEventListener('click', backupData)
+
 renderRanks()
+loadProfile()
 
 function startGame() {
   const bank = window.QUIZ_BANK.slice()
@@ -94,8 +113,11 @@ function showQuestion() {
   criteria.hidden = !quiz.criteria
   criteria.textContent = quiz.criteria ? `기준 · ${quiz.criteria}` : ''
 
+  const shuffled = shuffleChoices(quiz.choices, quiz.answer)
+  currentCorrectIndex = shuffled.correctIndex
+
   choicesEl.innerHTML = ''
-  quiz.choices.forEach((choice, choiceIndex) => {
+  shuffled.choices.forEach((choice, choiceIndex) => {
     const button = document.createElement('button')
     button.type = 'button'
     button.className = 'choice'
@@ -106,6 +128,15 @@ function showQuestion() {
 
   if (mode === 'speed') startTimer()
   else stopTimer()
+}
+
+function shuffleChoices(choices, correctAnswer) {
+  const indexed = choices.map((choice, i) => ({ choice, isCorrect: i === correctAnswer }))
+  const shuffled = shuffle(indexed)
+  return {
+    choices: shuffled.map((item) => item.choice),
+    correctIndex: shuffled.findIndex((item) => item.isCorrect),
+  }
 }
 
 function startTimer() {
@@ -138,8 +169,7 @@ function stopTimer() {
 
 function useHint() {
   if (locked || hinted) return
-  const quiz = round[index]
-  const wrong = quiz.choices.map((_, i) => i).filter((i) => i !== quiz.answer)
+  const wrong = [0, 1, 2, 3].filter((i) => i !== currentCorrectIndex)
   shuffle(wrong).slice(0, 2).forEach((choiceIndex) => {
     const button = choicesEl.children[choiceIndex]
     button.disabled = true
@@ -154,14 +184,14 @@ function judge(choiceIndex) {
   locked = true
   stopTimer()
   const quiz = round[index]
-  const correct = choiceIndex === quiz.answer
+  const correct = choiceIndex === currentCorrectIndex
   const gained = correct ? (hinted ? 6 : 10) : 0
   score += gained
   if (correct) correctCount += 1
 
   Array.from(choicesEl.children).forEach((button, buttonIndex) => {
     button.disabled = true
-    if (buttonIndex === quiz.answer) button.classList.add('correct')
+    if (buttonIndex === currentCorrectIndex) button.classList.add('correct')
     else if (buttonIndex === choiceIndex) button.classList.add('wrong')
   })
 
@@ -189,7 +219,7 @@ function showResult() {
   document.getElementById('result-copy').textContent =
     `${MODE_LABEL[mode]} 모드 · ${round.length}문제 중 ${correctCount}문제 정답 · 만점 ${possible}점`
   document.getElementById('rank-form').hidden = false
-  document.getElementById('player-name').value = ''
+  document.getElementById('player-name').value = getProfileName()
 }
 
 function saveRank(event) {
@@ -252,4 +282,133 @@ function shuffle(items) {
     ;[copy[i], copy[j]] = [copy[j], copy[i]]
   }
   return copy
+}
+
+function renderStats() {
+  const bank = window.QUIZ_BANK
+  const statsGrid = document.getElementById('stats-grid')
+  const myStats = document.getElementById('my-stats')
+
+  const categoryCount = {}
+  const difficultyCount = { '초급': 0, '중급': 0 }
+  const answerDist = [0, 0, 0, 0]
+
+  bank.forEach((q) => {
+    categoryCount[q.category] = (categoryCount[q.category] || 0) + 1
+    difficultyCount[q.difficulty] = (difficultyCount[q.difficulty] || 0) + 1
+    answerDist[q.answer] += 1
+  })
+
+  statsGrid.innerHTML = `
+    <div class="stat-card">
+      <h3>총 문항</h3>
+      <p class="stat-value">${bank.length}개</p>
+    </div>
+    <div class="stat-card">
+      <h3>분야별</h3>
+      <ul class="stat-list">
+        ${Object.keys(CATEGORY_LABEL).map((key) => `<li>${CATEGORY_LABEL[key]}: ${categoryCount[key] || 0}개</li>`).join('')}
+      </ul>
+    </div>
+    <div class="stat-card">
+      <h3>난이도별</h3>
+      <ul class="stat-list">
+        <li>초급: ${difficultyCount['초급']}개</li>
+        <li>중급: ${difficultyCount['중급']}개</li>
+      </ul>
+    </div>
+    <div class="stat-card">
+      <h3>정답 분포</h3>
+      <ul class="stat-list">
+        ${answerDist.map((count, i) => `<li>보기 ${i + 1}: ${count}개 (${Math.round(count / bank.length * 100)}%)</li>`).join('')}
+      </ul>
+    </div>
+  `
+
+  const ranks = loadRanks()
+  if (ranks.length === 0) {
+    myStats.innerHTML = '<p>아직 기록이 없습니다. 게임을 플레이해 보세요!</p>'
+  } else {
+    const totalGames = ranks.length
+    const avgScore = Math.round(ranks.reduce((sum, r) => sum + r.score, 0) / totalGames)
+    const bestScore = Math.max(...ranks.map((r) => r.score))
+    myStats.innerHTML = `
+      <div class="stat-card">
+        <h3>내 기록 요약</h3>
+        <ul class="stat-list">
+          <li>총 게임: ${totalGames}회</li>
+          <li>평균 점수: ${avgScore}점</li>
+          <li>최고 점수: ${bestScore}점</li>
+        </ul>
+      </div>
+    `
+  }
+}
+
+function loadProfile() {
+  try {
+    const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}')
+    document.getElementById('profile-name').value = profile.name || ''
+  } catch (error) {
+    document.getElementById('profile-name').value = ''
+  }
+}
+
+function saveProfile(event) {
+  event.preventDefault()
+  const name = document.getElementById('profile-name').value.trim()
+  localStorage.setItem(PROFILE_KEY, JSON.stringify({ name }))
+  alert('프로필이 저장되었습니다.')
+}
+
+function getProfileName() {
+  try {
+    const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}')
+    return profile.name || ''
+  } catch (error) {
+    return ''
+  }
+}
+
+function exportCSV() {
+  const ranks = loadRanks()
+  if (ranks.length === 0) {
+    alert('내보낼 기록이 없습니다.')
+    return
+  }
+
+  const headers = ['순위', '이름', '점수', '문제수', '모드', '날짜']
+  const rows = ranks.map((r, i) => [
+    i + 1,
+    r.name,
+    r.score,
+    r.total,
+    MODE_LABEL[r.mode] || r.mode,
+    new Date(r.at).toLocaleString('ko-KR'),
+  ])
+
+  const csv = [headers, ...rows].map((row) => row.join(',')).join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `quiz_report_${new Date().toISOString().slice(0, 10)}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+function backupData() {
+  const data = {
+    ranks: loadRanks(),
+    profile: JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}'),
+    exportedAt: new Date().toISOString(),
+  }
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `quiz_backup_${new Date().toISOString().slice(0, 10)}.json`
+  link.click()
+  URL.revokeObjectURL(url)
 }

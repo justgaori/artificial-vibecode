@@ -1,0 +1,38 @@
+---
+description: 손글씨 숫자 인식 앱 개발 규칙
+globs:
+  - "handwrite/**"
+---
+
+# 손글씨 숫자 인식 (InkNet)
+
+TensorFlow.js를 사용한 MNIST 손글씨 숫자(0-9) 인식 웹 앱입니다.
+
+## 출처
+
+이 앱은 외부 오픈소스 템플릿(InkNet)을 기반으로 합니다.
+- 라이선스: MIT
+- 원본 저작권: InkNet contributors
+
+## 기술 스택
+
+- HTML / CSS / JavaScript
+- TensorFlow.js 4.22
+- 사전학습 MNIST CNN 가중치
+
+## 동작 방식
+
+1. 캔버스에서 잉크가 있는 영역을 잘라 낸다.
+2. MNIST와 비슷하게 28×28, 흰 글씨·검은 배경으로 맞춘다.
+3. Keras CNN(Conv2D → Conv2D → MaxPool → Dense)에 넣어 10개 클래스 확률을 얻는다.
+
+## 한계
+
+- 숫자 한 글자만 인식한다.
+- 한글이나 영문자는 인식하지 않는다.
+- 필기 스타일에 따라 정확도가 달라질 수 있다.
+
+## 모델 로딩
+
+- 기본: 로컬 `model/model.json`
+- 대체: TensorFlow.js CDN fallback

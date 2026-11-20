@@ -1,0 +1,32 @@
+---
+description: 포트폴리오 페이지 개발 규칙
+globs:
+  - "portfolio/**"
+---
+
+# 마케팅 포트폴리오
+
+프롬프트 활용 실습을 위한 가상 프리랜서 마케터 포트폴리오입니다.
+
+## 목적
+
+- 5W1H PRD를 사용한 웹 페이지 기획 실습
+- 단계별 프롬프트로 뼈대→기능→디자인→점검 진행
+
+## 콘텐츠 주의사항
+
+- **이하린**은 실습용 가상 인물입니다.
+- 모든 수치와 사례는 예시입니다.
+- 실제 연락처가 아닙니다.
+
+## 페이지 구조
+
+1. `#hero-introduction`: 소개 및 Before/After 차트
+2. `#performance-metrics`: 연도별 성과 (예시)
+3. `#case-studies`: 사례 연구
+4. `#services`: 제공 서비스
+5. `#contact`: 연락처
+
+## 외부 의존성
+
+- Google Fonts: IBM Plex Sans KR, Newsreader

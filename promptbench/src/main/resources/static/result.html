@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결과 리포트 - PromptBench</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container result-container">
+        <header>
+            <h1>🧠 PromptBench</h1>
+            <p class="subtitle">결과 리포트</p>
+        </header>
+
+        <div class="result-header">
+            <h2 id="problem-title">문제 제목</h2>
+            <p id="username-display">사용자: -</p>
+            <div id="mock-notice" class="mock-badge" style="display:none; margin:1rem auto;">
+                🔸 모의 데이터로 측정된 결과입니다
+            </div>
+            <div id="pass-rate" class="pass-rate">--%</div>
+            <p id="test-summary">-/- 테스트 통과</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="value" id="stat-time">--:--</div>
+                <div class="label">소요 시간</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="stat-tokens">0</div>
+                <div class="label">총 토큰</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="stat-prompts">0</div>
+                <div class="label">프롬프트 수</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="stat-cost">$0</div>
+                <div class="label">예상 비용</div>
+            </div>
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="stat-card">
+                <div class="value" id="stat-prompt-tokens">0</div>
+                <div class="label">입력 토큰</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="stat-completion-tokens">0</div>
+                <div class="label">출력 토큰</div>
+            </div>
+        </div>
+
+        <div class="timeline-section">
+            <h3>📊 프롬프트 타임라인</h3>
+            <div id="timeline-chart" class="timeline-chart"></div>
+            <p id="timeline-empty" style="text-align:center;color:var(--text-muted);display:none;">
+                프롬프트 기록이 없습니다.
+            </p>
+        </div>
+
+        <div class="test-results">
+            <h3>🧪 테스트 결과</h3>
+            <div id="test-results-list"></div>
+        </div>
+
+        <div class="links" style="margin-top:2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+            <a href="/" class="btn btn-secondary">🏠 홈으로</a>
+            <a href="/leaderboard.html" class="btn btn-primary">🏆 리더보드</a>
+        </div>
+
+        <footer>
+            <p>PromptBench © 2024 - AI 협업 코딩 측정 플랫폼</p>
+        </footer>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const report = JSON.parse(localStorage.getItem('promptbench_report'));
+            
+            if (!report) {
+                alert('결과 데이터가 없습니다.');
+                window.location.href = '/';
+                return;
+            }
+
+            document.getElementById('problem-title').textContent = report.problemTitle;
+            document.getElementById('username-display').textContent = `사용자: ${report.username}`;
+            
+            if (report.mockSession) {
+                document.getElementById('mock-notice').style.display = 'block';
+            }
+
+            const passRateEl = document.getElementById('pass-rate');
+            passRateEl.textContent = `${report.passRate.toFixed(0)}%`;
+            if (report.passRate === 100) {
+                passRateEl.className = 'pass-rate perfect';
+            } else if (report.passRate >= 50) {
+                passRateEl.className = 'pass-rate partial';
+            } else {
+                passRateEl.className = 'pass-rate fail';
+            }
+
+            document.getElementById('test-summary').textContent = 
+                `${report.passedTests}/${report.totalTests} 테스트 통과`;
+
+            const mins = Math.floor(report.elapsedTimeSeconds / 60);
+            const secs = report.elapsedTimeSeconds % 60;
+            document.getElementById('stat-time').textContent = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+            document.getElementById('stat-tokens').textContent = formatTokens(report.totalTokens);
+            document.getElementById('stat-prompts').textContent = report.promptCount;
+            document.getElementById('stat-cost').textContent = formatCost(report.estimatedCost);
+            document.getElementById('stat-prompt-tokens').textContent = formatTokens(report.totalPromptTokens);
+            document.getElementById('stat-completion-tokens').textContent = formatTokens(report.totalCompletionTokens);
+
+            if (report.timeline && report.timeline.length > 0) {
+                const chartDiv = document.getElementById('timeline-chart');
+                const maxTokens = Math.max(...report.timeline.map(t => t.promptTokens + t.completionTokens));
+                
+                chartDiv.innerHTML = report.timeline.map((item, i) => {
+                    const height = maxTokens > 0 ? 
+                        ((item.promptTokens + item.completionTokens) / maxTokens * 150) : 20;
+                    return `
+                        <div class="timeline-bar" style="height:${Math.max(height, 20)}px;">
+                            <div class="tooltip">
+                                #${item.index}<br>
+                                ${item.elapsedSeconds}초 경과<br>
+                                토큰: ${item.promptTokens + item.completionTokens}<br>
+                                응답: ${item.responseTimeMs}ms
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                document.getElementById('timeline-chart').style.display = 'none';
+                document.getElementById('timeline-empty').style.display = 'block';
+            }
+
+            if (report.gradeResult && report.gradeResult.testResults) {
+                const resultsDiv = document.getElementById('test-results-list');
+                resultsDiv.innerHTML = report.gradeResult.testResults.map(r => `
+                    <div class="test-case ${r.passed ? 'passed' : 'failed'}">
+                        <div class="test-case-header">
+                            <span>테스트 ${r.index}</span>
+                            <span class="test-case-status ${r.passed ? 'passed' : 'failed'}">
+                                ${r.passed ? '✅ 통과' : '❌ 실패'}
+                            </span>
+                        </div>
+                        <div class="test-case-detail">
+                            <div>입력: <code>${escapeHtml(r.input || '-')}</code></div>
+                            <div>예상: <code>${escapeHtml(r.expected || '-')}</code></div>
+                            <div>실제: <code>${escapeHtml(r.actual || '-')}</code></div>
+                            ${r.error ? `<div style="color:var(--danger)">오류: ${escapeHtml(r.error)}</div>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        });
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

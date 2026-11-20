@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문제 풀이 - PromptBench</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css">
+    <style>
+        body { overflow: hidden; }
+        .container { max-width: 100%; padding: 1rem; }
+        header { margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 PromptBench</h1>
+            <div class="timer-display">
+                <span id="timer">00:00</span>
+                <span id="mock-indicator" class="mock-badge" style="display:none;">모의 모드</span>
+            </div>
+        </header>
+
+        <div class="solve-container">
+            <div class="editor-panel">
+                <div class="problem-info">
+                    <h3 id="problem-title">문제 제목</h3>
+                    <div id="problem-description" class="problem-description"></div>
+                </div>
+                <div class="editor-wrapper">
+                    <div id="editor" style="width:100%;height:100%;"></div>
+                </div>
+                <div class="editor-actions">
+                    <button class="btn btn-secondary" onclick="runTests()">🧪 테스트 실행</button>
+                    <button class="btn btn-success" onclick="submitCode()">✅ 제출하기</button>
+                </div>
+            </div>
+
+            <div class="chat-panel">
+                <div class="chat-header">
+                    <strong>💬 AI 도우미</strong>
+                    <div class="stats-bar">
+                        <div class="stat-item">
+                            <span>🎯</span>
+                            <span id="prompt-count">0</span>회
+                        </div>
+                        <div class="stat-item">
+                            <span>📊</span>
+                            <span id="token-count">0</span> 토큰
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message assistant">
+                        안녕하세요! 코딩 도우미입니다. 문제에 대해 질문해주세요. 😊
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chat-input" placeholder="질문을 입력하세요..." onkeypress="handleKeyPress(event)">
+                    <button class="btn btn-primary" onclick="sendMessage()">전송</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="test-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h3>🧪 테스트 결과</h3>
+            <div id="test-results"></div>
+            <button class="btn btn-primary" onclick="closeModal()">닫기</button>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--radius);
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 90%;
+        }
+        .modal-content h3 { margin-bottom: 1rem; }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/grader.js"></script>
+    <script>
+        let editor;
+        let session;
+        let timerInterval;
+        let startTime;
+        let testCases = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            session = JSON.parse(localStorage.getItem('promptbench_session'));
+            
+            if (!session) {
+                alert('세션 정보가 없습니다. 홈으로 이동합니다.');
+                window.location.href = '/';
+                return;
+            }
+
+            document.getElementById('problem-title').textContent = session.problemTitle;
+            document.getElementById('problem-description').innerHTML = renderMarkdown(session.problemDescription);
+            
+            if (session.isMockSession) {
+                document.getElementById('mock-indicator').style.display = 'inline-block';
+            }
+
+            require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+            require(['vs/editor/editor.main'], function() {
+                editor = monaco.editor.create(document.getElementById('editor'), {
+                    value: session.templateCode || '// 여기에 코드를 작성하세요\n',
+                    language: 'javascript',
+                    theme: 'vs-light',
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    automaticLayout: true,
+                    scrollBeyondLastLine: false
+                });
+            });
+
+            startTime = new Date(session.startedAt);
+            timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+            
+            await loadTestCases();
+        });
+
+        function updateTimer() {
+            const now = new Date();
+            const diff = Math.floor((now - startTime) / 1000);
+            const mins = Math.floor(diff / 60).toString().padStart(2, '0');
+            const secs = (diff % 60).toString().padStart(2, '0');
+            document.getElementById('timer').textContent = `${mins}:${secs}`;
+        }
+
+        async function loadTestCases() {
+            try {
+                const response = await fetch(`/api/problems/${session.sessionId}`);
+            } catch (e) {
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            input.value = '';
+            input.disabled = true;
+
+            const messagesDiv = document.getElementById('chat-messages');
+            messagesDiv.innerHTML += `<div class="message user">${escapeHtml(message)}</div>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: session.sessionId,
+                        message: message
+                    })
+                });
+
+                const data = await response.json();
+                
+                const mockClass = data.mock ? ' mock' : '';
+                messagesDiv.innerHTML += `<div class="message assistant${mockClass}">${renderMarkdown(data.message)}</div>`;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+                document.getElementById('prompt-count').textContent = data.promptCount || 0;
+                document.getElementById('token-count').textContent = formatTokens(data.totalSessionTokens || 0);
+
+            } catch (error) {
+                messagesDiv.innerHTML += `<div class="message assistant">오류가 발생했습니다: ${error.message}</div>`;
+            }
+
+            input.disabled = false;
+            input.focus();
+        }
+
+        async function runTests() {
+            const code = editor.getValue();
+            
+            try {
+                const response = await fetch('/api/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: session.sessionId,
+                        code: code
+                    })
+                });
+
+                const data = await response.json();
+                const testCases = JSON.parse(data.testCases);
+                
+                const results = await runTestsInWorker(code, testCases);
+                showTestResults(results, false);
+
+            } catch (error) {
+                alert('테스트 실행 실패: ' + error.message);
+            }
+        }
+
+        function showTestResults(results, isSubmit) {
+            const modal = document.getElementById('test-modal');
+            const resultsDiv = document.getElementById('test-results');
+            
+            const passed = results.filter(r => r.passed).length;
+            const total = results.length;
+            
+            resultsDiv.innerHTML = `
+                <div class="result-summary" style="margin-bottom:1rem;text-align:center;">
+                    <div style="font-size:2rem;font-weight:bold;color:${passed === total ? 'var(--success)' : 'var(--danger)'}">
+                        ${passed}/${total} 통과
+                    </div>
+                </div>
+                ${results.map((r, i) => `
+                    <div class="test-case ${r.passed ? 'passed' : 'failed'}">
+                        <div class="test-case-header">
+                            <span>테스트 ${i + 1}</span>
+                            <span class="test-case-status ${r.passed ? 'passed' : 'failed'}">
+                                ${r.passed ? '✅ 통과' : '❌ 실패'}
+                            </span>
+                        </div>
+                        <div class="test-case-detail">
+                            <div>입력: <code>${escapeHtml(r.input)}</code></div>
+                            <div>예상: <code>${escapeHtml(r.expected)}</code></div>
+                            <div>실제: <code>${escapeHtml(r.actual)}</code></div>
+                            ${r.error ? `<div style="color:var(--danger)">오류: ${escapeHtml(r.error)}</div>` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('test-modal').style.display = 'none';
+        }
+
+        async function submitCode() {
+            if (!confirm('코드를 제출하시겠습니까? 제출 후에는 수정할 수 없습니다.')) {
+                return;
+            }
+
+            const code = editor.getValue();
+            
+            try {
+                const response = await fetch('/api/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: session.sessionId,
+                        code: code
+                    })
+                });
+
+                const data = await response.json();
+                const testCases = JSON.parse(data.testCases);
+                
+                const results = await runTestsInWorker(code, testCases);
+                const passed = results.filter(r => r.passed).length;
+                const total = results.length;
+
+                const gradeResponse = await fetch('/api/grade', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: session.sessionId,
+                        code: code,
+                        passed: passed,
+                        total: total,
+                        testResults: results.map((r, i) => ({
+                            index: i + 1,
+                            passed: r.passed,
+                            input: r.input,
+                            expected: r.expected,
+                            actual: r.actual,
+                            error: r.error || null
+                        }))
+                    })
+                });
+
+                const report = await gradeResponse.json();
+                localStorage.setItem('promptbench_report', JSON.stringify(report));
+                
+                clearInterval(timerInterval);
+                window.location.href = '/result.html';
+
+            } catch (error) {
+                alert('제출 실패: ' + error.message);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

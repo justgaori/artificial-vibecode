@@ -1,0 +1,109 @@
+# PromptBench 프로젝트 Cursor 규칙
+
+## 프로젝트 개요
+
+PromptBench는 AI 협업 코딩 능력을 측정하는 플랫폼입니다.
+사용자가 AI 채팅을 활용해 코딩 문제를 해결하면서 시간, 토큰, 비용, 프롬프트 횟수를 자동 측정합니다.
+
+## 기술 스택
+
+- **백엔드**: Spring Boot 3.2, Java 17
+- **데이터베이스**: H2 (파일 모드, `./data/promptbench`)
+- **LLM API**: OpenRouter (OpenAI 호환)
+- **프론트엔드**: 순수 HTML/JS/CSS, Monaco Editor (CDN)
+- **채점**: Web Worker (브라우저 샌드박스, 3초 타임아웃)
+
+## 디렉토리 구조
+
+```
+promptbench/
+├── src/main/java/com/promptbench/
+│   ├── config/          # AppConfig - 설정 및 빈 정의
+│   ├── controller/      # REST API 및 페이지 컨트롤러
+│   ├── dto/             # 요청/응답 DTO
+│   ├── model/           # JPA 엔티티 (Problem, Session, PromptLog)
+│   ├── repository/      # Spring Data JPA 레포지토리
+│   └── service/         # 비즈니스 로직
+├── src/main/resources/
+│   ├── static/          # 프론트엔드 정적 파일
+│   │   ├── css/         # 스타일시트
+│   │   └── js/          # JavaScript 파일
+│   └── application.properties
+└── src/test/            # 테스트 코드
+```
+
+## 주요 엔티티
+
+### Problem
+- 코딩 문제 정보
+- `testCases`: JSON 배열 형식 `[{"input": "...", "expected": "..."}]`
+- `referenceSolution`: 참조 해답 코드
+- `isMock`: 모의 데이터 여부
+
+### Session
+- 풀이 세션
+- `totalPromptTokens`, `totalCompletionTokens`: 누적 토큰
+- `promptCount`: 프롬프트 횟수
+- `isMockSession`: 모의 모드 세션 여부
+
+### PromptLog
+- 개별 프롬프트 기록
+- API `usage` 필드에서 가져온 실제 토큰 수 저장
+
+## 모의 모드
+
+- 환경 변수 `OPENROUTER_API_KEY`가 비어있으면 자동으로 모의 모드 활성화
+- `MockLlmService`가 사전 정의된 문제와 응답 제공
+- 모의 응답은 `[모의 데이터]` 접두사로 시작
+- 토큰 수는 메시지 길이 기반으로 추정 (length / 4)
+
+## API 엔드포인트
+
+- `GET /api/status` - 모의 모드 여부 확인
+- `GET /api/problems` - 문제 목록
+- `POST /api/sessions/start` - 세션 시작
+- `POST /api/chat` - AI 채팅 (토큰 기록됨)
+- `POST /api/submit` - 제출 준비
+- `POST /api/grade` - 채점 결과 저장
+- `GET /api/leaderboard` - 리더보드
+
+## 코딩 컨벤션
+
+### Java
+- 클래스명: PascalCase
+- 메서드/변수: camelCase
+- 상수: UPPER_SNAKE_CASE
+- Lombok 최소화 (getter/setter 직접 작성)
+
+### JavaScript
+- 함수명: camelCase
+- 전역 변수 최소화
+- async/await 사용 권장
+
+### CSS
+- BEM 명명법 권장
+- CSS 변수 활용 (`var(--primary)`)
+
+## 테스트
+
+```bash
+./gradlew test
+```
+
+- `MockLlmServiceTest`: 모의 서비스 단위 테스트
+- `SessionFlowIntegrationTest`: 세션 전체 흐름 통합 테스트
+
+## 환경 설정
+
+`.env` 파일 (`.gitignore`에 포함됨):
+```
+OPENROUTER_API_KEY=your_key_here
+LLM_MODEL=meta-llama/llama-3.1-8b-instruct:free
+```
+
+## 주의사항
+
+1. **API 키 보안**: `.env` 파일은 절대 커밋하지 않음
+2. **토큰 측정**: API 응답의 `usage` 필드만 신뢰, 추정치 사용 금지
+3. **코드 실행 보안**: Web Worker 샌드박스 + 3초 타임아웃
+4. **한국어 UI**: 모든 사용자 인터페이스는 한국어로 작성
